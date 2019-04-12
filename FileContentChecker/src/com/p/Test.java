@@ -4,15 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import com.google.gson.Gson;
 import com.p.pojo.FileProfile;
+import com.p.pojo.SimilarFiles;
 import com.p.util.FileUtils;
 
 public class Test {
 
 	public static void main(String[] args) {
+		
+		
 		try {
 			List<File> fileList = FileUtils.getFileList(new File(
 					"C:/tutorials/ebooks-home-pc"));
@@ -48,16 +54,7 @@ public class Test {
 										new File(fp1.getFilePath()), new File(
 												fp2.getFilePath()));
 						if (same) {
-							// System.out.println("Files " + fp1.getFilePath()
-							// + " and " + fp2.getFilePath()
-							// + " are Equal :- " + same);
 
-							// create instance of Random class
-
-							// Generate random integers in range 0 to 999
-							// String uniqueStr = System.currentTimeMillis() +
-							// "_"
-							// + rand.nextInt(1000);
 							String uniqueStr = generateUniqueString(rand,
 									fp1.getFileEqualityProfile(),
 									fp2.getFileEqualityProfile());
@@ -72,22 +69,41 @@ public class Test {
 				}
 			}
 
+			Map<String, List<FileProfile>> map=new HashMap<String, List<FileProfile>>();
 			System.out.println("\n\n>>>>>>>>>>>>>>>>>");
 			for (FileProfile fp1 : fileProfileList) {
-				System.out.println(fp1);
+				if(fp1.getFileEqualityProfile()!=null&&!fp1.getFileEqualityProfile().equals("")){
+					List<FileProfile> list=map.get(fp1.getFileEqualityProfile());
+					if(list==null||list.size()==0){
+						list=new ArrayList<FileProfile>();
+					}
+					list.add(fp1);
+					map.put(fp1.getFileEqualityProfile(), list);
+				}
+				
+				//System.out.println(fp1);
 			}
+			
+			PrintStream ps1 = new PrintStream(new File("C:/tutorials/diff1.txt"));
+			List<SimilarFiles> similarFiles=new ArrayList<SimilarFiles>();
+			for(String key:map.keySet()){
+				List<FileProfile> list=map.get(key);
+				ps1.println("===================================="
+						+ "\n"+key);
+				for(FileProfile fp1 : list){
+					ps1.println(fp1);
+				}
+				similarFiles.add(new SimilarFiles(key, list));
+			}
+			
+			PrintStream ps2 = new PrintStream(new File("C:/tutorials/diff2.json"));
+			Gson gson = new Gson(); 
+			String json = gson.toJson(similarFiles);
+			ps2.println(json);
 
-			// String[] files = {
-			// "C:/tutorials/ebooks-home-pc/AI/Artificial Intelligence A Modern Approach  3rd Edition.pdf",
-			// "C:/tutorials/ebooks-home-pc/AI/Artificial Intelligence A Modern Approach 3rd Edition.pdf"
-			// };
-			// System.out.println("Files "
-			// + files[0]
-			// + " and "
-			// + files[1]
-			// + " are Equal :- "
-			// + FileUtils.contentEquals(new File(files[0]), new File(
-			// files[1])));
+			ps.close();
+			ps1.close();
+			ps2.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

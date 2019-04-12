@@ -204,7 +204,7 @@ public class FileUtils {
      * or if they point to the same file, before resorting to byte-by-byte
      * comparison of the contents.
      * <p>
-     * Code origin: Avalon
+     * Code origin: Premendra Kumar
      *
      * @param file1 the first file
      * @param file2 the second file
